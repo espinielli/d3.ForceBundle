@@ -13,6 +13,7 @@
       subdivision_points_for_edge = [],
       K = 0.1, // global bundling constant controlling edge stiffness
       S_initial = 0.1, // init. distance to move points
+      S_rate = 2, // init. distance to move points
       P_initial = 1, // init. subdivision number
       P_rate = 2, // subdivision rate increase
       C = 6, // number of cycles to perform
@@ -333,7 +334,7 @@
           }
         }
 				// prepare for next cycle
-        S = S / 2
+        S = S / S_rate
         P = P * P_rate
         I = I_rate * I
 
@@ -376,16 +377,7 @@
 
       return forcebundle
     }
-
-    forcebundle.step_size = function (step) {
-      if (arguments.length === 0) {
-        return S_initial
-      } else {
-        S_initial = step
-      }
-
-      return forcebundle
-    }
+    forcebundle.K = forcebundle.bundling_stiffness
 
     forcebundle.cycles = function (c) {
       if (arguments.length === 0) {
@@ -396,7 +388,32 @@
 
       return forcebundle
     }
+    forcebundle.C = forcebundle.cycles
 
+	//  ************  STEPS (S0, S) ************
+    forcebundle.step_size = function (step) {
+      if (arguments.length === 0) {
+        return S_initial
+      } else {
+        S_initial = step
+      }
+
+      return forcebundle
+    }
+    forcebundle.S0 = forcebundle.step_size
+
+    forcebundle.step_rate = function (step) {
+      if (arguments.length === 0) {
+        return S_rate
+      } else {
+        S_rate = step
+      }
+
+      return forcebundle
+    }
+    forcebundle.S = forcebundle.step_rate
+
+	//  ************  ITERATIONS (I0, I) ************
     forcebundle.iterations = function (i) {
       if (arguments.length === 0) {
         return I_initial
@@ -406,6 +423,7 @@
 
       return forcebundle
     }
+    forcebundle.I0 = forcebundle.iterations
 
     forcebundle.iterations_rate = function (i) {
       if (arguments.length === 0) {
@@ -416,7 +434,9 @@
 
       return forcebundle
     }
+    forcebundle.I = forcebundle.iterations_rate
 
+	//  ************  SUBDIVISIONS (P0, P) ************
     forcebundle.subdivision_points_seed = function (p) {
       if (arguments.length == 0) {
         return P
@@ -426,6 +446,7 @@
 
       return forcebundle
     }
+    forcebundle.P0 = forcebundle.subdivision_points_seed
 
     forcebundle.subdivision_rate = function (r) {
       if (arguments.length === 0) {
@@ -436,7 +457,9 @@
 
       return forcebundle
     }
+    forcebundle.P = forcebundle.subdivision_rate
 
+	//  ************  COMPATIBILITY THRESHOLD ************
     forcebundle.compatibility_threshold = function (t) {
       if (arguments.length === 0) {
         return compatibility_threshold
@@ -446,7 +469,7 @@
 
       return forcebundle
     }
-
+    forcebundle.Ct = forcebundle.compatibility_threshold
 		/** * ************************ ***/
 
     return forcebundle
