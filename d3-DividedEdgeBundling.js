@@ -1,14 +1,22 @@
 /*
     Implementation of Divided Edge Bundling algorithm
 
-Reference:
-    David Selassie, Brandon Heller, Jeffrey Heer
-    "Divided Edge Bundling for Directional Network Data",
-    IEEE Trans. Visualization & Comp. Graphics (Proc. InfoVis), 2011
+    Reference:
+        David Selassie, Brandon Heller, Jeffrey Heer
+        "Divided Edge Bundling for Directional Network Data",
+        IEEE Trans. Visualization & Comp. Graphics (Proc. InfoVis), 2011
+        http://vis.stanford.edu/papers/divided-edge-bundling
+    software: http://selassid.github.com/DividedEdgeBundling/
+    paper: http://vis.stanford.edu/files/2011-DividedEdgeBundling-InfoVis.pdf
 
-Author: Enrico Spinielli, 2017
+    Author: Enrico Spinielli, 2017
     (based on work from Corneliu S. (github.com/upphiminn) 2013)
  */
+
+// conventions:
+//   p, q    litteral nodes, i.e. {'x': ...,'y': ...}
+//   e       litteral edge, i.e. {'source':'nodeid1', 'target':'nodeid2'}
+//   P, Q    edge ids, i.e. "123"
 !(function () {
   d3.DividedEdgeBundling = function () {
     var data_nodes = {}, // {'nodeid':{'x':,'y':},..}
@@ -26,7 +34,7 @@ Author: Enrico Spinielli, 2017
       compatibility_threshold = 0.6,
       eps = 1e-6
 
-        /** * Geometry Helper Methods ***/
+    /** Geometry Helper Methods **/
     function vector_dot_product (p, q) {
       return p.x * q.x + p.y * q.y
     }
