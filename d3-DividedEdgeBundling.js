@@ -40,14 +40,19 @@
     }
 
     function edge_as_vector (P) {
+      var sx = data_nodes[P.source].x
+      var sy = data_nodes[P.source].y
+      var tx = data_nodes[P.target].x
+      var ty = data_nodes[P.target].y
+
       return {
-        'x': data_nodes[P.target].x - data_nodes[P.source].x,
-        'y': data_nodes[P.target].y - data_nodes[P.source].y
+        'x': tx - sx,
+        'y': ty - sy
       }
     }
 
     function edge_length (e) {
-            // handling nodes that are on the same location, so that K/edge_length != Inf
+      // handling nodes that are on the same location, so that K/edge_length != Inf
       if (Math.abs(data_nodes[e.source].x - data_nodes[e.target].x) < eps &&
                 Math.abs(data_nodes[e.source].y - data_nodes[e.target].y) < eps) {
         return eps
@@ -58,16 +63,24 @@
     }
 
     function custom_edge_length (e) {
-      return Math.sqrt(Math.pow(e.source.x - e.target.x, 2) + Math.pow(e.source.y - e.target.y, 2))
+      var sx = e.source.x
+      var sy = e.source.y
+      var tx = e.target.x
+      var ty = e.target.y
+      var dx = sx - tx
+      var dy = sy - ty
+      return Math.sqrt(dx * dx + dy * dy)
     }
 
     function edge_midpoint (e) {
-      var middle_x = (data_nodes[e.source].x + data_nodes[e.target].x) / 2.0
-      var middle_y = (data_nodes[e.source].y + data_nodes[e.target].y) / 2.0
+      var sx = data_nodes[e.source].x
+      var sy = data_nodes[e.source].y
+      var tx = data_nodes[e.target].x
+      var ty = data_nodes[e.target].y
 
       return {
-        'x': middle_x,
-        'y': middle_y
+        'x': (sx + tx) / 2.0,
+        'y': (sy + ty) / 2.0
       }
     }
 
@@ -83,16 +96,31 @@
     }
 
     function euclidean_distance (p, q) {
-      return Math.sqrt(Math.pow(p.x - q.x, 2) + Math.pow(p.y - q.y, 2))
+      var dx = p.x - q.x
+      var dy = p.y - q.y
+      return Math.sqrt(dx * dx + dy * dy)
     }
 
     function project_point_on_line (p, Q) {
-      var L = Math.sqrt((Q.target.x - Q.source.x) * (Q.target.x - Q.source.x) + (Q.target.y - Q.source.y) * (Q.target.y - Q.source.y))
-      var r = ((Q.source.y - p.y) * (Q.source.y - Q.target.y) - (Q.source.x - p.x) * (Q.target.x - Q.source.x)) / (L * L)
+      // see "Minimum Distance between a Point and a Line"
+      // by Paul Bourke
+      // http://paulbourke.net/geometry/pointlineplane/
+      var sx = Q.source.x
+      var sy = Q.source.y
+      var tx = Q.target.x
+      var ty = Q.target.y
+      var dx = tx - sx
+      var dy = ty - sy
+
+      var L = Math.sqrt(dx * dx + dy * dy)
+
+      // if edges are coincidents return any of them
+      if (L === 0.0) return {'x': sx, 'y': sy}
+      var r = ((p.x - sx) * (tx - sx) + (p.y - sy) * (ty - sy)) / (L * L)
 
       return {
-        'x': (Q.source.x + r * (Q.target.x - Q.source.x)),
-        'y': (Q.source.y + r * (Q.target.y - Q.source.y))
+        'x': (sx + r * dx),
+        'y': (sy + r * dy)
       }
     }
 
