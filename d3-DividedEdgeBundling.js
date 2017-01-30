@@ -1,11 +1,15 @@
 /*
- FDEB algorithm implementation [www.win.tue.nl/~dholten/papers/forcebundles_eurovis.pdf].
+    Implementation of Divided Edge Bundling algorithm
 
- Author: Corneliu S. (github.com/upphiminn)
- 2013
+Reference:
+    David Selassie, Brandon Heller, Jeffrey Heer
+    "Divided Edge Bundling for Directional Network Data",
+    IEEE Trans. Visualization & Comp. Graphics (Proc. InfoVis), 2011
 
+Author: Enrico Spinielli, 2017
+    (based on work from Corneliu S. (github.com/upphiminn) 2013)
  */
-(function () {
+!(function () {
   d3.DividedEdgeBundling = function () {
     var data_nodes = {}, // {'nodeid':{'x':,'y':},..}
       data_edges = [], // [{'source':'nodeid1', 'target':'nodeid2'},..]
@@ -22,7 +26,7 @@
       compatibility_threshold = 0.6,
       eps = 1e-6
 
-		/** * Geometry Helper Methods ***/
+        /** * Geometry Helper Methods ***/
     function vector_dot_product (p, q) {
       return p.x * q.x + p.y * q.y
     }
@@ -35,14 +39,14 @@
     }
 
     function edge_length (e) {
-			// handling nodes that are on the same location, so that K/edge_length != Inf
+            // handling nodes that are on the same location, so that K/edge_length != Inf
       if (Math.abs(data_nodes[e.source].x - data_nodes[e.target].x) < eps &&
-				Math.abs(data_nodes[e.source].y - data_nodes[e.target].y) < eps) {
+                Math.abs(data_nodes[e.source].y - data_nodes[e.target].y) < eps) {
         return eps
       }
 
       return Math.sqrt(Math.pow(data_nodes[e.source].x - data_nodes[e.target].x, 2) +
-				Math.pow(data_nodes[e.source].y - data_nodes[e.target].y, 2))
+                Math.pow(data_nodes[e.source].y - data_nodes[e.target].y, 2))
     }
 
     function custom_edge_length (e) {
@@ -84,9 +88,9 @@
       }
     }
 
-		/** * ********************** ***/
+        /** * ********************** ***/
 
-		/** * Initialization Methods ***/
+        /** * Initialization Methods ***/
     function initialize_edge_subdivisions () {
       for (var i = 0; i < data_edges.length; i++) {
         if (P_initial === 1) {
@@ -110,7 +114,7 @@
 
       for (var e = 0; e < edgelist.length; e++) {
         if (data_nodes[edgelist[e].source].x != data_nodes[edgelist[e].target].x ||
-					data_nodes[edgelist[e].source].y != data_nodes[edgelist[e].target].y) { // or smaller than eps
+                    data_nodes[edgelist[e].source].y != data_nodes[edgelist[e].target].y) { // or smaller than eps
           filtered_edge_list.push(edgelist[e])
         }
       }
@@ -118,9 +122,9 @@
       return filtered_edge_list
     }
 
-		/** * ********************** ***/
+        /** * ********************** ***/
 
-		/** * Force Calculation Methods ***/
+        /** * Force Calculation Methods ***/
     function apply_spring_force (e_idx, i, kP) {
       var prev = subdivision_points_for_edge[e_idx][i - 1]
       var next = subdivision_points_for_edge[e_idx][i + 1]
@@ -166,7 +170,7 @@
 
     function apply_resulting_forces_on_subdivision_points (e_idx, P, S) {
       var kP = K / (edge_length(data_edges[e_idx]) * (P + 1)) // kP=K/|P|(number of segments), where |P| is the initial length of edge P.
-			// (length * (num of sub division pts - 1))
+            // (length * (num of sub division pts - 1))
       var resulting_forces_for_subdivision_points = [{
         'x': 0,
         'y': 0
@@ -195,9 +199,9 @@
       return resulting_forces_for_subdivision_points
     }
 
-		/** * ********************** ***/
+        /** * ********************** ***/
 
-		/** * Edge Division Calculation Methods ***/
+        /** * Edge Division Calculation Methods ***/
     function update_edge_divisions (P) {
       for (var e_idx = 0; e_idx < data_edges.length; e_idx++) {
         if (P === 1) {
@@ -237,9 +241,9 @@
       }
     }
 
-		/** * ********************** ***/
+        /** * ********************** ***/
 
-		/** * Edge compatibility measures ***/
+        /** * Edge compatibility measures ***/
     function angle_compatibility (P, Q) {
       return Math.abs(vector_dot_product(edge_as_vector(P), edge_as_vector(Q)) / (edge_length(P) * edge_length(Q)))
     }
@@ -307,9 +311,9 @@
       }
     }
 
-		/** * ************************ ***/
+        /** * ************************ ***/
 
-		/** * Main Bundling Loop Methods ***/
+        /** * Main Bundling Loop Methods ***/
     var forcebundle = function () {
       var S = S_initial
       var I = I_initial
@@ -333,21 +337,21 @@
             }
           }
         }
-				// prepare for next cycle
+                // prepare for next cycle
         S = S / S_rate
         P = P * P_rate
         I = I_rate * I
 
         update_edge_divisions(P)
-				// console.log('C' + cycle);
-				// console.log('P' + P);
-				// console.log('S' + S);
+                // console.log('C' + cycle);
+                // console.log('P' + P);
+                // console.log('S' + S);
       }
       return subdivision_points_for_edge
     }
-		/** * ************************ ***/
+        /** * ************************ ***/
 
-		/** * Getters/Setters Methods ***/
+        /** * Getters/Setters Methods ***/
     forcebundle.nodes = function (nl) {
       if (arguments.length === 0) {
         return data_nodes
@@ -390,7 +394,7 @@
     }
     forcebundle.C = forcebundle.cycles
 
-	//  ************  STEPS (S0, S) ************
+    //  ************  STEPS (S0, S) ************
     forcebundle.step_size = function (step) {
       if (arguments.length === 0) {
         return S_initial
@@ -413,7 +417,7 @@
     }
     forcebundle.S = forcebundle.step_rate
 
-	//  ************  ITERATIONS (I0, I) ************
+    //  ************  ITERATIONS (I0, I) ************
     forcebundle.iterations = function (i) {
       if (arguments.length === 0) {
         return I_initial
@@ -436,7 +440,7 @@
     }
     forcebundle.I = forcebundle.iterations_rate
 
-	//  ************  SUBDIVISIONS (P0, P) ************
+    //  ************  SUBDIVISIONS (P0, P) ************
     forcebundle.subdivision_points_seed = function (p) {
       if (arguments.length == 0) {
         return P
@@ -459,7 +463,7 @@
     }
     forcebundle.P = forcebundle.subdivision_rate
 
-	//  ************  COMPATIBILITY THRESHOLD ************
+    //  ************  COMPATIBILITY THRESHOLD ************
     forcebundle.compatibility_threshold = function (t) {
       if (arguments.length === 0) {
         return compatibility_threshold
@@ -470,7 +474,7 @@
       return forcebundle
     }
     forcebundle.Ct = forcebundle.compatibility_threshold
-		/** * ************************ ***/
+        /** * ************************ ***/
 
     return forcebundle
   }
